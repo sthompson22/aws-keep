@@ -1,6 +1,5 @@
 # IAM groups
 ## admin
-
 resource "aws_iam_group" "admin" {
   name = "admin"
   path = "/admin/"
@@ -18,7 +17,6 @@ resource "aws_iam_group_membership" "admin" {
 
 # IAM policies
 ## admin
-
 resource "aws_iam_group_policy" "admin" {
   name  = "admin"
   group = aws_iam_group.admin.id
@@ -41,7 +39,6 @@ EOF
 
 # IAM users
 ## me
-
 resource "aws_iam_user" "me" {
   name = "sthompson22"
   path = "/admin/"
