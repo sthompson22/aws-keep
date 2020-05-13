@@ -1,0 +1,76 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keep-beacon-client-1
+  namespace: default
+  labels:
+    app: keep-client
+    type: beacon
+    id: '1'
+    network: mainnet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keep-client
+      type: beacon
+      id: '1'
+  serviceName: keep-beacon-client-1
+  volumeClaimTemplates:
+  - metadata:
+      name: keep-beacon-client-data
+    spec:
+      accessModes: [ReadWriteOnce]
+      resources:
+        requests:
+          storage: 512Mi
+  template:
+    metadata:
+      labels:
+        app: keep-client
+        type: beacon
+        id: '1'
+        network: mainnet
+    spec:
+      containers:
+      - name: keep-beacon-client-1
+        image: keepnetwork/keep-client:v1.1.2
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 3920
+        env:
+          - name: KEEP_ETHEREUM_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: keep-beacon-client-1
+                key: eth-account-passphrase
+          - name: LOG_LEVEL
+            value: info
+          - name: IPFS_LOGGING_FMT
+            value: nocolor
+        volumeMounts:
+          - name: keep-beacon-client-data
+            mountPath: /mnt/keep-beacon-client/data
+          - name: keep-beacon-client-config
+            mountPath: /mnt/keep-beacon-client/config
+          - name: eth-account-keyfile
+            mountPath: /mnt/keep-beacon-client/keyfile
+        command: ["keep-client", "-config", "/mnt/keep-beacon-client/config/keep-beacon-client-config.toml", "start"]
+      volumes:
+      - name: keep-beacon-client-data
+        persistentVolumeClaim:
+          claimName: keep-beacon-client-data
+      - name: keep-beacon-client-config
+        secret:
+          secretName: keep-beacon-client-1
+          items:
+          - key: keep-beacon-client-config.toml
+            path: keep-beacon-client-config.toml
+      - name: eth-account-keyfile
+        secret:
+          secretName: keep-beacon-client-1
+          items:
+          - key: eth-account-keyfile
+            path: eth-account-keyfile
+
