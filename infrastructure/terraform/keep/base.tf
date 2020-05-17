@@ -95,3 +95,11 @@ resource "aws_s3_bucket_object" "keep-beacon-client" {
   source     = "/dev/null"
   kms_key_id = aws_kms_key.eth-accounts-bucket.arn
 }
+
+## bucket folders, one for each client type
+resource "aws_s3_bucket_object" "keep-ecdsa-client" {
+  key        = "keep-ecdsa-client/"
+  bucket     = aws_s3_bucket.eth-accounts.id
+  source     = "/dev/null"
+  kms_key_id = aws_kms_key.eth-accounts-bucket.arn
+}
