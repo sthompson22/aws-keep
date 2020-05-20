@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: keep-beacon-client-1
-        image: keepnetwork/keep-client:v1.1.2
+        image: keepnetwork/keep-client:v1.2.0
         imagePullPolicy: Always
         ports:
           - containerPort: 3920
