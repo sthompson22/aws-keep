@@ -1,0 +1,76 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keep-ecdsa-client-0
+  namespace: default
+  labels:
+    app: keep-client
+    type: ecdsa
+    id: '0'
+    network: mainnet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keep-client
+      type: ecdsa
+      id: '0'
+  serviceName: keep-ecdsa-client-0
+  volumeClaimTemplates:
+  - metadata:
+      name: keep-ecdsa-client-data
+    spec:
+      accessModes: [ReadWriteOnce]
+      resources:
+        requests:
+          storage: 512Mi
+  template:
+    metadata:
+      labels:
+        app: keep-client
+        type: ecdsa
+        id: '0'
+        network: mainnet
+    spec:
+      containers:
+      - name: keep-ecdsa-client-0
+        image: keepnetwork/keep-ecdsa-client:v1.1.0
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 4920
+        env:
+          - name: KEEP_ETHEREUM_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: keep-ecdsa-client-0
+                key: eth-account-passphrase
+          - name: LOG_LEVEL
+            value: info
+          - name: IPFS_LOGGING_FMT
+            value: nocolor
+        volumeMounts:
+          - name: keep-ecdsa-client-data
+            mountPath: /mnt/keep-ecdsa-client/data
+          - name: keep-ecdsa-client-config
+            mountPath: /mnt/keep-ecdsa-client/config
+          - name: eth-account-keyfile
+            mountPath: /mnt/keep-ecdsa-client/keyfile
+        command: ["keep-ecdsa", "-config", "/mnt/keep-ecdsa-client/config/keep-ecdsa-client-config.toml", "start"]
+      volumes:
+      - name: keep-ecdsa-client-data
+        persistentVolumeClaim:
+          claimName: keep-ecdsa-client-data
+      - name: keep-ecdsa-client-config
+        secret:
+          secretName: keep-ecdsa-client-0
+          items:
+          - key: keep-ecdsa-client-config.toml
+            path: keep-ecdsa-client-config.toml
+      - name: eth-account-keyfile
+        secret:
+          secretName: keep-ecdsa-client-0
+          items:
+          - key: eth-account-keyfile
+            path: eth-account-keyfile
+
